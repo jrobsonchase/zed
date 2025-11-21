@@ -142,6 +142,7 @@ let
           gpu-lib
           xorg.libX11
           xorg.libxcb
+          protobuf
         ]
         ++ lib.optionals stdenv'.hostPlatform.isDarwin [
           apple-sdk_15

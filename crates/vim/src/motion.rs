@@ -1717,11 +1717,8 @@ pub(crate) fn next_word_end(
         } else {
             point
         };
-        let new_point = movement::find_boundary_exclusive(
-            map,
-            new_point,
-            FindRange::MultiLine,
-            |left, right| {
+        let new_point =
+            movement::find_boundary(map, new_point, FindRange::MultiLine, |left, right| {
                 let left_kind = classifier.kind(left);
                 let right_kind = classifier.kind(right);
                 let at_newline = right == '\n';
@@ -1732,8 +1729,7 @@ pub(crate) fn next_word_end(
                 }
 
                 left_kind != right_kind && left_kind != CharKind::Whitespace
-            },
-        );
+            });
         let new_point = if need_next_char {
             next_char(map, new_point, true)
         } else {
