@@ -44,12 +44,12 @@
       });
       devShells = forAllSystems (pkgs: {
         default = pkgs.callPackage ./nix/shell.nix {
-          zed-editor = mkZed pkgs;
+          zed = mkZed pkgs;
         };
       });
       formatter = forAllSystems (pkgs: pkgs.nixfmt-rfc-style);
       overlays.default = final: _: {
-        zed-editor = mkZed final;
+        zed-editor = (mkZed final).zed;
       };
     };
 

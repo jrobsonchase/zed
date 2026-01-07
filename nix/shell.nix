@@ -1,9 +1,10 @@
 {
+  lib,
   mkShell,
   makeFontsConf,
   pkgsCross,
 
-  zed-editor,
+  zed,
 
   rust-analyzer,
   rustup,
@@ -16,9 +17,22 @@
   nodejs_22,
   zig,
 }:
-(mkShell.override { inherit (zed-editor) stdenv; }) {
-  inputsFrom = [ zed-editor ];
-  packages = [
+let
+  allCrateBuilds = lib.pipe zed.workspace.workspaceMembers [
+    builtins.attrValues
+    (map (
+      c:
+      ((builtins.getAttr "build" c).overrideAttrs (attrs: {
+        passthru = {
+          env = attrs.env or { };
+        };
+      }))
+    ))
+  ];
+in
+(mkShell.override { inherit (zed.workspace.workspaceMembers.zed.build) stdenv; }) {
+  inputsFrom = allCrateBuilds;
+  inputs = [
     rust-analyzer
     rustup
     cargo-nextest
@@ -37,10 +51,7 @@
 
   env =
     let
-      baseEnvs =
-        (zed-editor.overrideAttrs (attrs: {
-          passthru = { inherit (attrs) env; };
-        })).env; # exfil `env`; it's not in drvAttrs
+      baseEnvs = (lib.foldr (c: acc: acc // c.env) { }) allCrateBuilds;
     in
     (removeAttrs baseEnvs [
       "LK_CUSTOM_WEBRTC" # download the staticlib during the build as usual
